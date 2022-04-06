@@ -1,8 +1,10 @@
 module RedBlackTree where
 
   open import Data.Nat using (ℕ; zero; suc; _⊔_)
+  open import Agda.Builtin.Nat using (_==_)
   open import Data.Maybe using (Maybe; nothing; just)
   open import Data.Product using  (_×_; _,_)
+  open import Data.Bool.Base using (Bool; true; false; _∧_)
 
   data Color : Set where
     RED : Color
@@ -78,3 +80,18 @@ module RedBlackTree where
     max-depth (Node _ _ l r) =  suc ((max-depth l) ⊔ (max-depth r))
 
     
+   --  RBT PROPERTY VALIDATION -> ROOT, RED, DEPTH 
+    root-property : Tree → Bool
+    root-property Leaf = true
+    root-property (Node _ BLACK _ _) = true
+    root-property (Node _ RED _ _) = false
+
+    red-property : Tree → Bool
+    red-property Leaf = true
+    red-property (Node _ RED (Node _ RED _ _) _) = false
+    red-property (Node _ RED _ (Node _ RED _ _)) = false
+    red-property (Node _ _ l r) = (red-property l) ∧ (red-property r)
+
+    depth-property : Tree → Bool
+    depth-property Leaf = true
+    depth-property (Node _ _ l r) = (depth-property l) ∧ (depth-property r) ∧ ((black-depth l) == (black-depth r))

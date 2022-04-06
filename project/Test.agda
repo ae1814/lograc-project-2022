@@ -2,8 +2,8 @@ module Test where
 
   open import Data.Nat using (ℕ; compare)
   open import Data.Product using (_×_; _,_)
-  open import Agda.Builtin.String
-  open import  RedBlackTree using (insert; search; get-value-by-key;  black-depth; max-depth; OrderRBT; Tree; RED; BLACK; Leaf; Node; EQUAL; GREATER; LESS)
+  open import Agda.Builtin.String using (String)
+  open import  RedBlackTree using (insert; search; get-value-by-key;  black-depth; max-depth; root-property; red-property; depth-property; OrderRBT; Tree; RED; BLACK; Leaf; Node; EQUAL; GREATER; LESS)
  
   nat-order : (A : ℕ) → (A : ℕ) → OrderRBT
   nat-order x y with compare x y
@@ -43,3 +43,15 @@ module Test where
   getValue3 = get-value-by-key nat-order 0 tree4
   getValue4 = get-value-by-key nat-order 3 tree4
   getValue5 = get-value-by-key nat-order 2 tree4
+
+  checkRootProperty1 = root-property nat-order tree4
+  checkRootProperty2 = root-property nat-order (Node (2 , "test 2") RED (Node (1 , "test 3") BLACK Leaf Leaf) (Node (5 , "test 5") BLACK Leaf Leaf))
+
+  checkRedProperty1 = red-property nat-order tree4
+  checkRedProperty2 = red-property nat-order (Node (2 , "test 2") BLACK (Node (1 , "test 3") RED (Node (0 , "test 0") RED Leaf Leaf) Leaf) (Node (5 , "test 5") RED Leaf Leaf))
+
+  checkDepthProperty1 = depth-property nat-order tree4
+  checkDepthProperty2 = depth-property nat-order (Node (2 , "test 2") BLACK (Node (1 , "test 3") RED (Node (0 , "test 0") BLACK Leaf Leaf) Leaf) (Node (5 , "test 5") RED Leaf Leaf))
+  
+
+  
