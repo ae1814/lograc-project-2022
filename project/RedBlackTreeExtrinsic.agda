@@ -1,4 +1,4 @@
-module RedBlackTree where
+module RedBlackTreeExtrinsic where
 
   open import Data.Nat using (ℕ; zero; suc; _⊔_)
   open import Agda.Builtin.Nat using (_==_)

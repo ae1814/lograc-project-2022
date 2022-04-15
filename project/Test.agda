@@ -3,7 +3,7 @@ module Test where
   open import Data.Nat using (ℕ; compare)
   open import Data.Product using (_×_; _,_)
   open import Agda.Builtin.String using (String)
-  open import  RedBlackTree using (insert; search; get-value-by-key;  black-depth; max-depth; root-property; red-property; depth-property; OrderRBT; Tree; RED; BLACK; Leaf; Node; EQUAL; GREATER; LESS)
+  open import  RedBlackTreeExtrinsic using (insert; search; get-value-by-key;  black-depth; max-depth; root-property; red-property; depth-property; OrderRBT; Tree; RED; BLACK; Leaf; Node; EQUAL; GREATER; LESS)
  
   nat-order : (A : ℕ) → (A : ℕ) → OrderRBT
   nat-order x y with compare x y
