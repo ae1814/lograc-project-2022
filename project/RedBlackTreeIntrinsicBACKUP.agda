@@ -1,4 +1,4 @@
-module RedBlackTreeIntrinsic where
+module RedBlackTreeIntrinsicBACKUP where
 
   open import Data.Nat using (ℕ)
   open import Agda.Builtin.Nat
@@ -200,9 +200,8 @@ module RedBlackTreeIntrinsic where
              → Tree A [ x ] upper cr n
              → Tree A lower upper BLACK (suc n)
              
-  data RBT {A : Set}  {{_ : Ord A}}
-         {lower upper : [ A ]∞} :  Set where
-        Root : {n : ℕ} → Tree A lower upper BLACK n → RBT
+  data RBT {A : Set}  {{_ : Ord A}} :  Set where
+        Root : {n : ℕ} → Tree A -∞ +∞ BLACK n → RBT
 
 
   module Insert {{_ : TDO A}} where
@@ -224,27 +223,27 @@ module RedBlackTreeIntrinsic where
               → TreeAux (incr-if-black c n)
  
 
-    balance-left-red : ∀{n c lower upper} → HeightTree n → A → Tree A lower upper c n → TreeAux n
+    balance-left-red : ∀{n c lower upper} → HeightTree n → (x : A) →  Tree A lower upper c n  →  TreeAux n
     balance-left-red (height-red l) x r = aux-node x RED {!!} {!!}
     balance-left-red (height-black l) x r = aux-node x RED {!!} {!!} 
     
 
-    balance-right-red : ∀ {n c lower upper} → Tree A lower upper c n → A → HeightTree n → TreeAux n
+    balance-right-red : ∀ {n c lower upper} → Tree A lower upper c n → (x : A)  → HeightTree n → TreeAux n
     balance-right-red l x (height-red r) = aux-node x RED {!!} {!!}
     balance-right-red l x (height-black r) = aux-node x RED {!!} {!!}
 
 
-    balance-left-black : {n : ℕ}{c : Color} → TreeAux n → A → Tree A lower upper c n → HeightTree (suc n)
+    balance-left-black : ∀ {n c}   (t1 : TreeAux n)   (t : Tree A lower upper c n) (x : A) → HeightTree (suc n)
 
-    balance-left-black (aux-node y RED (node-red x a b) c) z d = height-red (node-red y (node-black x a b) (node-black z {!!} {!!}))
-    balance-left-black (aux-node x RED a (node-red y b c)) z d = height-red (node-red y (node-black x a b) (node-black z {!!} {!!}))
+    balance-left-black (aux-node y RED (node-red x a b) c) d z = height-red (node-red y (node-black x a b) (node-black z {!c!} {!!}))
+    balance-left-black (aux-node x RED a (node-red y b c)) d z = height-red (node-red y (node-black x a b) (node-black z {!!} {!!}))
 
-    balance-left-black (aux-node x BLACK a b) y r = height-black (node-black y (node-black x a {!!}) {!!})
-    balance-left-black (aux-node x RED leaf leaf) y r = height-black (node-black y (node-red x leaf {!!}) {!!})
-    balance-left-black (aux-node x RED (node-black x1 a1 a2) (node-black y1 b1 b2)) y c = height-black (node-black y (node-red x (node-black x1 a1 a2) (node-black y1 b1 {!!})) {!!})
+    balance-left-black (aux-node x BLACK a b) r y = height-black (node-black y (node-black x a {!!}) {!!})
+    balance-left-black (aux-node x RED leaf leaf) r y = height-black (node-black y (node-red x leaf {!!}) {!!})
+    balance-left-black (aux-node x RED (node-black x1 a1 a2) (node-black y1 b1 b2)) c y = height-black (node-black y (node-red x (node-black x1 a1 a2) (node-black y1 b1 {!!})) {!!})
 
 
-    balance-right-black : ∀ {n c} → Tree A lower upper c n → A → TreeAux n → HeightTree (suc n)
+    balance-right-black : ∀ {n c} → Tree A lower upper c n → (x : A)   → TreeAux n → HeightTree (suc n)
     balance-right-black a x (aux-node z RED (node-red y b c) d) = height-red (node-red y (node-black x {!!} {!!}) (node-black z c d))
     balance-right-black a x (aux-node y RED b (node-red z c d)) = height-red (node-red y (node-black x {!!}  {!!}) (node-black z c d))
     balance-right-black a x (aux-node y RED leaf leaf) = height-black (node-black x  {!!} (node-red y {!!}  leaf))
@@ -259,14 +258,15 @@ module RedBlackTreeIntrinsic where
 
 
     mutual
-        insert-black : {n : ℕ} (t : Tree A upper lower BLACK n) (x : A) → HeightTree n
+        insert-black : ∀{n} (t : Tree A lower upper BLACK n) (x : A)
+         → {{l≤x : lower ≤ [ x ]}} {{x≤u : [ x ] ≤ upper}} → HeightTree n
         insert-black leaf x = height-red (node-red x leaf leaf)
         insert-black (node-black y l r) x with tri x y
-        ... | less  = balance-left-black (insert-aux l x) y r
+        ... | less  = balance-left-black (insert-aux l x) r y
         ... | greater  = balance-right-black l x (insert-aux r x)
         ... | equal  = height-black (node-black x {!!} {!!})
   
-        insert-aux : {n : ℕ}{c : Color} (t : Tree A upper lower c n) (x : A) → TreeAux n
+        insert-aux : {n : ℕ}{c : Color} (t : Tree A lower upper c n) (x : A)  → {{l≤x : lower ≤ [ x ]}} {{x≤u : [ x ] ≤ upper}} → TreeAux n
         insert-aux (node-red y l r) x with tri x y 
         ... | less = balance-left-red (insert-black l x) y r
         ... | greater = balance-right-red l y (insert-black r x)
