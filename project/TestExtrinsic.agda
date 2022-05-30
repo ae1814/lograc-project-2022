@@ -1,10 +1,10 @@
-module Test where
+module TestExtrinsic where
 
   open import Data.Nat using (ℕ; compare)
   open import Data.Product using (_×_; _,_)
   open import Agda.Builtin.String using (String)
-  open import  RedBlackTreeExtrinsic using (insert; search; get-value-by-key;  black-depth; max-depth; root-property; red-property; depth-property; OrderRBT; Tree; RED; BLACK; Leaf; Node; EQUAL; GREATER; LESS)
- 
+  open import  RedBlackTreeExtrinsic using (insert-ext; search-ext; get-value-by-key;  black-depth; max-depth; root-property; red-property; depth-property; OrderRBT; Tree; RED; BLACK; Leaf; Node; EQUAL; GREATER; LESS)
+  
   nat-order : (A : ℕ) → (A : ℕ) → OrderRBT
   nat-order x y with compare x y
   ... | Data.Nat.equal _   = EQUAL
@@ -54,4 +54,5 @@ module Test where
   checkDepthProperty2 = depth-property nat-order (Node (2 , "test 2") BLACK (Node (1 , "test 3") RED (Node (0 , "test 0") BLACK Leaf Leaf) Leaf) (Node (5 , "test 5") RED Leaf Leaf))
   
 
+  
   

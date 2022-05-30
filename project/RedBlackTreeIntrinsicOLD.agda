@@ -1,4 +1,4 @@
-module RedBlackTreeIntrinsicBACKUP where
+module RedBlackTreeIntrinsicOLD where
 
   open import Data.Nat using (ℕ)
   open import Agda.Builtin.Nat
@@ -30,6 +30,12 @@ module RedBlackTreeIntrinsicBACKUP where
 
   record ⊤ : Set where
     constructor tt 
+
+
+
+  mapMaybe : (A → B) → (Maybe A → Maybe B)
+  mapMaybe f (just x) = just (f x)
+  mapMaybe f nothing = nothing
 
   data ⊥ : Set where 
 
@@ -222,9 +228,12 @@ module RedBlackTreeIntrinsicBACKUP where
               →  Tree A lower [ x ] c1 n → Tree A [ x ] upper  c2 n
               → TreeAux (incr-if-black c n)
  
-
+    -- 1. Treba je TreeAux in HeightTree dopolnit da returnata tudi boundaries, Tko pol lahko definam kaj se vrne iz rebalance funkcij.
+    -- Npr. -> AuxTree n lower upper, oziroma pomoje da morm vrnt v tjle spodaj TreeAux n lower x.. Se mi zdi da tko forcam kaksna meja bo v
+    -- tem nodevm aux-node. Zna bit da podobno za Lookup in barve..
+    
     balance-left-red : ∀{n c lower upper} → HeightTree n → (x : A) →  Tree A lower upper c n  →  TreeAux n
-    balance-left-red (height-red l) x r = aux-node x RED {!!} {!!}
+    balance-left-red (height-red l) x r = aux-node x RED {!l!} {!!}
     balance-left-red (height-black l) x r = aux-node x RED {!!} {!!} 
     
 
@@ -280,6 +289,37 @@ module RedBlackTreeIntrinsicBACKUP where
   
     insert : RBT → A → RBT
     insert (Root t) x = black-root (insert-black t x)
+
+
+  module Lookup {{_ : TDO A}} where
+
+    isRed : Color → Bool
+    isRed RED = true
+    isRed BLACK = false
+
+    isBlack : Color → Bool
+    isBlack RED = false
+    isBlack BLACK = true
+    
+
+    data _∈_ {lower} {upper} {c} {n} (x : A) : 
+             (t : Tree A lower upper c n) →   Set where
+         here-red  : ∀ {l r} → x ≡ y  →  x ∈ node-red y l r
+         here-black  : ∀ {l r} → x ≡ y → c ≡ BLACK →  x ∈ node-black y l r
+         left  : ∀ {l r} → x ∈ l → x ∈ _ y l r
+         right : ∀ {l r} → x ∈ r → x ∈ _ y l r
+
+    lookup : ∀ {lower} {upper} {c} {n}
+           → (x : A) (t : Tree A lower upper c n) → Maybe (x ∈ t)
+    lookup x leaf = nothing
+    lookup x (node-red y t₁ t₂) with tri x y
+    ... | less    = mapMaybe left (lookup x t₁)
+    ... | equal   = just (here-red it)
+    ... | greater = mapMaybe right (lookup x t₂)
+    lookup x (node-black y t₁ t₂) with tri x y
+    ... | less    = mapMaybe left (lookup x t₁)
+    ... | equal   = just (here-black it)
+    ... | greater = mapMaybe right (lookup x t₂)
 
   -- Tests:
 
