@@ -8,7 +8,7 @@ module RedBlackIntrinsic where
   open import Data.Product using  (_×_; _,_)
   open import Data.Bool.Base using (Bool; true; false; _∧_)
 
-  data Color : Set where
+data Color : Set where
   RED : Color
   BLACK : Color
 
@@ -220,7 +220,7 @@ module _ {{_ : Order A}} where
 
     data _∈_ {lower} {upper} {c} {n} (x : A) : 
              (t : Tree A lower upper c n) →   Set where
-         here-red  : ∀ {l r} → x ≡ y  →  x ∈ node-red y l r
+         here-red  : ∀ {l r} → x ≡ y → c ≡ RED →  x ∈ node-red y l r
          here-black  : ∀ {l r} → x ≡ y → c ≡ BLACK →  x ∈ node-black y l r
          left  : ∀ {l r} → x ∈ l → x ∈ _ y l r
          right : ∀ {l r} → x ∈ r → x ∈ _ y l r
@@ -228,11 +228,11 @@ module _ {{_ : Order A}} where
     lookup : ∀ {lower} {upper} {c} {n}
            → (x : A) (t : Tree A lower upper c n) → Maybe (x ∈ t)
     lookup x leaf = nothing
-    lookup x (node-red y t₁ t₂) with tri x y
+    lookup x (node-red y t₁ t₂) with compare x y
     ... | less    = mapMaybe left (lookup x t₁)
     ... | equal   = just (here-red it)
     ... | greater = mapMaybe right (lookup x t₂)
-    lookup x (node-black y t₁ t₂) with tri x y
+    lookup x (node-black y t₁ t₂) with compare x y
     ... | less    = mapMaybe left (lookup x t₁)
     ... | equal   = just (here-black it)
     ... | greater = mapMaybe right (lookup x t₂)
