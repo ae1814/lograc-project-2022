@@ -276,75 +276,7 @@ module Search {{_ : DecidableOrder A}} where
   search x = find x (\ _ -> false) (\ _ _ -> true)
 open Search
 
--- INSERT:
-module Insert {{_ : DecidableOrder A}} where
-  data TreeAux (lower upper : [ A ]∞) : Color -> Nat -> Set where
-    correct : ∀ {n c}
-            (cCurr : Color)
-            (t : Tree lower upper cCurr n) 
-            -> TreeAux lower upper c n
-    wrongLR : ∀ {n}
-            (x : A)
-            (left : Tree lower [ x ] RED n)
-            (right : Tree [ x ] upper BLACK n)   
-            -> TreeAux lower upper RED n
-    wrongRR : ∀ {n}
-            (x : A)
-            (left : Tree lower [ x ] BLACK n)
-            (right : Tree [ x ] upper RED n)
-            -> TreeAux lower upper RED n
-
-  -- red-to-black :  ∀ {lower upper n}  → Tree lower upper RED n → Tree lower upper BLACK (suc n)
-  -- red-to-black  (node-red x l r) = node-black x l r
-  
-  recInsert : ∀ {rLower rUpper rN lower upper c n} 
-            -> TreeAux lower upper c n 
-            -> Zipper rLower rUpper BLACK rN lower upper c n 
-            -> ∃ \ rColor 
-            -> Tree rLower rUpper rColor rN
-  recInsert (correct c t)                     zip-root                 = c , t
-  recInsert (correct c t)                     (zip-black-left x z r)   = recInsert (correct BLACK (node-black x t r)) z
-  recInsert (correct c t)                     (zip-black-right x l z)  = recInsert (correct BLACK (node-black x l t)) z
-  recInsert (correct BLACK t)                 (zip-red-left x z r)     = recInsert (correct RED (node-red x t r)) z
-  recInsert (correct BLACK t)                 (zip-red-right x l z)    = recInsert (correct RED (node-red x l t)) z
-  recInsert (correct RED t)                   (zip-red-left x z r)     = recInsert (wrongLR x t r) z
-  recInsert (correct RED t)                   (zip-red-right x l z)    = recInsert (wrongRR x l t) z
-  recInsert (wrongRR x l (node-red rx rl rr)) (zip-black-left y z r)   = recInsert (correct RED (node-red rx (node-black x l rl) (node-black y rr r)))  z
-  recInsert (wrongRR x l (node-red rx rl rr)) (zip-black-right y l1 z) = recInsert (correct RED (node-red x (node-black y l1 l) (node-black rx rl rr))) z
-  recInsert (wrongLR x (node-red lx ll lr) r) (zip-black-left y z r1)  = recInsert (correct RED (node-red x (node-black lx ll lr) (node-black y r r1))) z
-  recInsert (wrongLR x (node-red lx ll lr) r) (zip-black-right y l z)  = recInsert (correct RED (node-red lx (node-black y l ll) (node-black x lr r)))  z
-
-
-
-  ins : ∀ {rLower rUpper rn}(x : A) {{p : rLower ≤ [ x ]}}{{q : [ x ] ≤ rUpper}}
-      -> Tree rLower rUpper BLACK rn
-      -> ∃ \ rColor
-      -> Tree rLower rUpper rColor rn
-  ins x t = find x
-    (\ z -> recInsert (correct RED (node-red x leaf leaf)) z) 
-    (\ _ _ -> BLACK , t) t
-
-  insert-aux : ∀ {lower upper n}(x : A){{p : lower ≤ [ x ]}}{{q : [ x ] ≤ upper}}
-             -> Tree lower upper BLACK n
-             -> ∃ \ n1
-             -> Tree lower upper BLACK n1
-  insert-aux x t with ins x t
-  ... | BLACK , t1 = _ , t1
-  ... | RED , node-red y t1 t2 = _ , node-black y t1 t2
-
-  insert : ∀ {lower upper n}(x : A){{p : lower ≤ [ x ]}}{{q : [ x ] ≤ upper}}
-         (t : Tree lower upper BLACK n)
-         -> Tree lower upper BLACK (proj₁ (insert-aux x t))
-  insert x t = proj₂ (insert-aux x t)
-open Insert
-
 module Test where
-  initNat : Tree {{Order-Nat}}  -∞ +∞ BLACK 1
+  initNat : Tree {{Order-Nat}}  -∞ +∞ _ _
   initNat = node-black 10 leaf leaf
-  t1 = insert 1 initNat
-  t3 = insert 2 t1
-  t2 = insert 9 (insert 7 (insert 123 (insert 4 (insert 5 (insert 6 
-      (insert 22 (insert 3 (insert 2 t1))))))))
-  e2 = search 8 t2
-  e3 = search 22 t2
 
