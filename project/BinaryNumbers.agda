@@ -91,7 +91,7 @@ module BinaryNumbers where
     begin
       from (x O) + from (y O) ≡⟨⟩
       (from x) * 2 + (from y) * 2 ≡⟨ *-distribʳ-+ 2 (from x) (from y) ⟩
-      (from x + from y) * 2  ≡⟨ (add-from x y) * 2 ⟩
+      (from x + from y) * 2  ≡⟨ cong (λ u → u * 2) (add-from x y)  ⟩
       (from (add x y)) * 2
     ∎
   add-from (x O) (y I) = {!!}
