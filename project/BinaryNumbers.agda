@@ -90,11 +90,18 @@ module BinaryNumbers where
   add-from (x O) (y O) =
     begin
       from (x O) + from (y O) ≡⟨⟩
-      (from x) * 2 + (from y) * 2 ≡⟨ *-distribʳ-+ 2 (from x) (from y) ⟩
+      (from x) * 2 + (from y) * 2 ≡⟨ sym (*-distribʳ-+ 2 (from x) (from y)) ⟩
       (from x + from y) * 2  ≡⟨ cong (λ u → u * 2) (add-from x y)  ⟩
       (from (add x y)) * 2
     ∎
-  add-from (x O) (y I) = {!!}
+  add-from (x O) (y I) =
+      begin
+      from (x O) + from (y I) ≡⟨⟩
+      (from x) * 2 + ((from y) * 2 + 1) ≡⟨ sym (+-assoc ((from x) * 2) ((from y) * 2) 1) ⟩
+      (from x) * 2 + (from y) * 2 + 1 ≡⟨ cong (λ u → u + 1) (sym (*-distribʳ-+ 2 (from x) (from y))) ⟩
+      (from x + from y) * 2 + 1 ≡⟨ cong (λ u → u * 2 + 1) (add-from x y)  ⟩
+      (from (add x y)) * 2 + 1
+    ∎
   add-from (x I) ⟨⟩ =
     begin
       from (x I) + from ⟨⟩ ≡⟨⟩
@@ -102,8 +109,32 @@ module BinaryNumbers where
       from ⟨⟩ + ((from x) * 2 + 1) ≡⟨⟩
       from x * 2 + 1
      ∎
-  add-from (x I) (y O) = {!!}
-  add-from (x I) (y I) = {!!}
+  add-from (x I) (y O) =
+    begin
+      from (x I) + from (y O) ≡⟨⟩
+      ((from x) * 2 + 1) + (from y) * 2 ≡⟨ +-comm ((from x) * 2 + 1) ((from y) * 2) ⟩
+      (from y) * 2 + ((from x) * 2 + 1)  ≡⟨ sym (+-assoc ((from y) * 2) ((from x) * 2) 1) ⟩
+      (from y) * 2 + (from x) * 2 + 1 ≡⟨ cong (λ u → u + 1) (sym (*-distribʳ-+ 2 (from y) (from x))) ⟩
+      (from y + from x) * 2 + 1 ≡⟨ cong (λ u → u * 2 + 1) (+-comm (from y) (from x)) ⟩
+      (from x + from y) * 2 + 1 ≡⟨ cong (λ u → u * 2 + 1) (add-from x y) ⟩
+      (from (add x y)) * 2 + 1
+    ∎
+  add-from (x I) (y I) =
+    begin
+      from (x I) + from (y I) ≡⟨⟩
+      ((from x) * 2 + 1) + ((from y) * 2 + 1) ≡⟨ sym (+-assoc ((from x) * 2 + 1) ((from y) * 2) 1) ⟩
+      ((from x) * 2 + 1) + (from y) * 2 + 1 ≡⟨ +-comm ((from x) * 2 + 1) ((from y) * 2) ⟩
+      (from y) * 2 + 1 + ((from x) * 2 + 1) ≡⟨ sym (+-assoc ((from y) * 2 + 1) ((from x) * 2) 1) ⟩
+      (from y) * 2 + 1 + (from x) * 2 + 1 ≡⟨ cong (((from y) * 2) +_) (+-comm 1 ((from x) * 2 + 1)) ⟩
+      (from y) * 2 + (from x) * 2 + 1 + 1  ≡⟨ cong (λ u → u + 1 + 1) (sym (*-distribʳ-+ 2 (from y) (from x))) ⟩
+      (from y + from x) * 2 + 1 + 1 ≡⟨ cong (λ u → u * 2 + 1 + 1) (+-comm (from y) (from x)) ⟩
+      (from x + from y) * 2 + 1 + 1 ≡⟨ cong (λ u → u * 2 + 1 + 1) (add-from x y) ⟩
+      (from (add x y)) * 2 + 1 + 1 ≡⟨ +-assoc (from (add x y) * 2) 1 1 ⟩
+      (from (add x y)) * 2 + (1 + 1) ≡⟨⟩
+      (from (add x y)) * 2 + 2 ≡⟨ sym (*-distribʳ-+ 1 (from (add x y)) 1) ⟩
+      ((from (add x y)) + 1) * 2 -- ≡⟨⟩
+      -- (from (add-one (add x y))) * 2
+    ∎
   -- Now prove basic properties of addition (hint: use existing
   -- properties for ℕ in the standard library and transport them to binary
   -- using add-from and add-to).
