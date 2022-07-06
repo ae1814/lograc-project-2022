@@ -61,6 +61,44 @@ module BinaryNumbers where
   -- Prove that your definition of addition is correct, i.e.,
   -- that conversion functions convert add to _+_ and vice versa
 
+--  add-one+ : ∀ (x : ℕ) → x + 1 ≡ from (add-one (to x))
+--  add-one+ zero =
+--    begin
+--      zero + (suc zero)  ≡⟨⟩
+--      suc zero
+--    ∎
+--  add-one+ (suc x) =
+--    begin
+--      (suc x) + 1 ≡⟨ refl ⟩
+--      1 + x  + 1 ≡⟨ +-comm 1 (x + 1) ⟩ 
+--      x + 1 + 1 ≡⟨ cong (λ u → u + 1) (add-one+ x) ⟩ 
+--      from (add-one (to x)) + 1  ≡⟨ sym (+-comm (from (add-one (to x))) 1) ⟩
+--      1 + from (add-one (to x)) ≡⟨ +-suc 1 (from (add-one (to x))) ⟩
+--     suc (from (add-one (to x))) ≡⟨ sym (cong suc (⊔-idem ((from (add-one (to x)))))) ⟩
+--      from (add-one (to (suc x)))
+--    ∎
+
+  add-one+ : ∀ (x : Bin) → (from x) + 1 ≡ from (add-one x)
+  add-one+ ⟨⟩ =
+    begin
+      from ⟨⟩ + 1  ≡⟨⟩
+      from (add-one ⟨⟩)
+    ∎
+  add-one+ (x O) =
+    begin
+      from (x O) + 1  ≡⟨⟩
+      (from x) * 2 + 1
+    ∎
+  add-one+ (x I) =
+    begin
+      from (x I) + 1  ≡⟨⟩
+      (from x) * 2 + 1 + 1  ≡⟨ +-assoc ((from x) * 2) 1 1 ⟩
+      (from x) * 2 + (1 + 1) ≡⟨⟩
+      (from x) * 2 + 2 ≡⟨ sym (*-distribʳ-+ 2 (from x) 1) ⟩
+      ((from x) + 1) * 2 ≡⟨ cong (λ u → u * 2) (add-one+ x) ⟩
+      (from (add-one x)) * 2
+    ∎
+
 
   add-from : ∀ (x y : Bin) → from x + from y ≡ from (add x y)
   add-from ⟨⟩ ⟨⟩ =
@@ -119,22 +157,32 @@ module BinaryNumbers where
       (from x + from y) * 2 + 1 ≡⟨ cong (λ u → u * 2 + 1) (add-from x y) ⟩
       (from (add x y)) * 2 + 1
     ∎
-  add-from (x I) (y I) =
+  add-from (x I) (y I) = 
     begin
       from (x I) + from (y I) ≡⟨⟩
-      ((from x) * 2 + 1) + ((from y) * 2 + 1) ≡⟨ sym (+-assoc ((from x) * 2 + 1) ((from y) * 2) 1) ⟩
-      ((from x) * 2 + 1) + (from y) * 2 + 1 ≡⟨ +-comm ((from x) * 2 + 1) ((from y) * 2) ⟩
-      (from y) * 2 + 1 + ((from x) * 2 + 1) ≡⟨ sym (+-assoc ((from y) * 2 + 1) ((from x) * 2) 1) ⟩
-      (from y) * 2 + 1 + (from x) * 2 + 1 ≡⟨ cong (((from y) * 2) +_) (+-comm 1 ((from x) * 2 + 1)) ⟩
-      (from y) * 2 + (from x) * 2 + 1 + 1  ≡⟨ cong (λ u → u + 1 + 1) (sym (*-distribʳ-+ 2 (from y) (from x))) ⟩
-      (from y + from x) * 2 + 1 + 1 ≡⟨ cong (λ u → u * 2 + 1 + 1) (+-comm (from y) (from x)) ⟩
-      (from x + from y) * 2 + 1 + 1 ≡⟨ cong (λ u → u * 2 + 1 + 1) (add-from x y) ⟩
-      (from (add x y)) * 2 + 1 + 1 ≡⟨ +-assoc (from (add x y) * 2) 1 1 ⟩
+      (from x) * 2 + 1 + ((from y) * 2 + 1) ≡⟨ sym (+-assoc ((from x) * 2 + 1) ((from y) * 2) 1) ⟩
+      ((from x) * 2 + 1) + (from y) * 2 + 1 ≡⟨ +-assoc ((from x) * 2 + 1) ((from y) * 2) 1 ⟩
+      ((from x) * 2 + 1) + ((from y) * 2 + 1) ≡⟨ +-comm ((from x) * 2 + 1) ((from y) * 2 + 1) ⟩
+      (from y) * 2 + 1 + ((from x) * 2 + 1)  ≡⟨ sym (+-assoc ((from y) * 2 + 1) ((from x) * 2) 1) ⟩
+      (from y) * 2 + 1 + (from x) * 2 + 1 ≡⟨ +-assoc ((from y) * 2 + 1) ((from x) * 2) 1 ⟩
+      (from y) * 2 + 1 + ((from x) * 2 + 1) ≡⟨ +-assoc ((from y) * 2) 1 ((from x) * 2 + 1) ⟩
+      (from y) * 2 + (1 + (from x) * 2 + 1) ≡⟨ cong (λ u → (from y) * 2 + u) (+-comm 1 ((from x) * 2 + 1)) ⟩
+      
+      (from y) * 2 + ((from x) * 2 + 1 + 1) ≡⟨ cong (λ u → from y * 2 + u ) (+-assoc ((from x) * 2) 1 1) ⟩
+      (from y) * 2 + ((from x) * 2 + (1 + 1)) ≡⟨ sym (+-assoc ((from y) * 2) ((from x) * 2) (1 + 1)) ⟩
+      (from y) * 2 + (from x) * 2 + (1 + 1) ≡⟨ cong (λ u → u + (1 + 1)) (sym (*-distribʳ-+ 2 (from y) (from x))) ⟩
+      (from y + from x) * 2 + (1 + 1) ≡⟨ cong (λ u → u * 2 + (1 + 1)) (+-comm (from y) (from x)) ⟩
+      (from x + from y) * 2 + (1 + 1) ≡⟨ cong (λ u → u * 2 + (1 + 1)) (add-from x y) ⟩
       (from (add x y)) * 2 + (1 + 1) ≡⟨⟩
-      (from (add x y)) * 2 + 2 ≡⟨ sym (*-distribʳ-+ 1 (from (add x y)) 1) ⟩
-      ((from (add x y)) + 1) * 2 -- ≡⟨⟩
-      -- (from (add-one (add x y))) * 2
+      (from (add x y)) * 2 + 2 ≡⟨ sym (*-distribʳ-+ 2 (from (add x y)) 1) ⟩
+      (from (add x y) + 1) * 2 ≡⟨ cong (λ u → u * 2) (+-comm (from (add x y)) 1) ⟩
+      (1 + from (add x y)) * 2 ≡⟨ cong (λ u → u * 2) (+-comm 1 (from (add x y))) ⟩
+      (from (add x y) + 1) * 2 ≡⟨ cong (λ u → u * 2) (add-one+ (add x y)) ⟩         
+      (from (add-one (add x y))) * 2
     ∎
+
+  add-to : ∀ (m n : ℕ) → add (to m) (to n) ≡ to (m + n)
+  add-to m n = {!!}
   -- Now prove basic properties of addition (hint: use existing
   -- properties for ℕ in the standard library and transport them to binary
   -- using add-from and add-to).
