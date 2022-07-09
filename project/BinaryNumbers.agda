@@ -237,11 +237,45 @@ module BinaryNumbers where
   -- properties for ℕ in the standard library and transport them to binary
   -- using add-from and add-to).
 
+  *+ : ∀ (x : ℕ) →  x * 2  ≡ x + x
+  *+ zero = refl
+  *+ (suc x) =
+    begin 
+      (suc x) * 2 ≡⟨⟩
+      suc (suc (x * 2)) ≡⟨ cong (λ u → suc (suc u)) (*+ x) ⟩
+      suc (suc (x + x)) ≡⟨⟩
+      suc ((suc x) + x) ≡⟨ cong suc (+-comm (suc x) x) ⟩
+      suc x + suc x
+    ∎
+
+
+  
+  *+bin :  ∀ (x : Bin) →  add x x  ≡ (x O)
+  *+bin ⟨⟩ =
+    begin
+      add ⟨⟩ ⟨⟩ ≡⟨ {!!} ⟩
+      ⟨⟩ O
+    ∎
+  *+bin (x O) =
+    begin
+      add (x O) (x O) ≡⟨ {!!} ⟩
+      x O O
+    ∎
+    
+  *+bin (x I) = 
+    begin
+      add (x I) (x I) ≡⟨ {!!} ⟩
+      x I O
+    ∎
+  
   to∘from :  ∀ (x : Bin) →  to (from x) ≡ x
   to∘from ⟨⟩ = refl
   to∘from (x O) =
     begin
-      to (from x * 2) ≡⟨ {!!} ⟩
+      to (from x * 2) ≡⟨ cong to (*+ (from x)) ⟩
+      to (from x + from x) ≡⟨ sym (add-to (from x) (from x)) ⟩
+      add (to (from x)) (to (from x)) ≡⟨ cong (λ u → add u u) (to∘from x) ⟩
+      add x x ≡⟨ *+bin x ⟩
       x O
     ∎
   to∘from (x I) =
@@ -249,6 +283,16 @@ module BinaryNumbers where
       to (from x * 2 + 1) ≡⟨ {!!} ⟩
       x I
     ∎
+
+  from∘to :  ∀ (x : ℕ) →  from (to x) ≡ x
+  from∘to zero = refl
+  from∘to (suc x) =
+    begin
+      from (to (suc x))  ≡⟨ {!!} ⟩
+      suc (from (to x)) ≡⟨ cong suc (from∘to x) ⟩
+      suc x
+    ∎
+    
 
 
   add-comm : ∀ x y → add x y ≡ add y x
@@ -263,7 +307,21 @@ module BinaryNumbers where
     ∎
 
   add-assoc : ∀ x y z → add x (add y z) ≡ add (add x y) z
-  add-assoc x y z = {!!}
+  add-assoc x y z =
+    begin
+      add x (add y z) ≡⟨ cong (λ u → add x u) (sym (to∘from (add y z))) ⟩
+      add x (to (from (add y z)))  ≡⟨ cong (λ u → add x u) (cong to (sym (add-from y z))) ⟩
+      add x (to (from y + from z))  ≡⟨ sym (to∘from (add x (to (from y + from z)))) ⟩
+      to (from (add x (to (from y + from z)))) ≡⟨ cong to (sym (add-from x (to (from y + from z)))) ⟩
+      to (from x + from (to (from y + from z))) ≡⟨ cong to (cong ((λ u → from x + u)) (from∘to ((from y + from z)))) ⟩
+      to (from x + (from y + from z)) ≡⟨ cong to (sym (+-assoc (from x) (from y) (from z) )) ⟩
+      to (from x + from y + from z)  ≡⟨ cong to (cong ((λ u → u + from z)) (sym (from∘to ((from x + from y)))))  ⟩
+      to (from (to (from x + from y)) + from z) ≡⟨ cong to (add-from (to (from x + from y)) z) ⟩
+      to (from (add (to (from x + from y)) z)) ≡⟨ to∘from (add (to (from x + from y)) z)  ⟩
+      add (to (from x + from y)) z  ≡⟨ cong (λ u → add u z) (cong to (add-from x y)) ⟩
+      add (to (from (add x y))) z  ≡⟨ cong (λ u → add u z) (to∘from (add x y)) ⟩
+      add (add x y) z
+    ∎
 
   -- you may prove other properties, as you see fit, but you don't
   -- have to go crazy here
