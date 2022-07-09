@@ -9,7 +9,7 @@ open import Relation.Binary.PropositionalEquality  as Eq
 open Eq using (_≡_; refl; sym; trans; cong; subst; resp)
 open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; step-≡; _∎)
 open import Data.Nat.Properties
-
+open import Function         using (id; _∘_; case_of_)
 
 module BinaryNumbers where
 
@@ -167,7 +167,6 @@ module BinaryNumbers where
       (from y) * 2 + 1 + (from x) * 2 + 1 ≡⟨ +-assoc ((from y) * 2 + 1) ((from x) * 2) 1 ⟩
       (from y) * 2 + 1 + ((from x) * 2 + 1) ≡⟨ +-assoc ((from y) * 2) 1 ((from x) * 2 + 1) ⟩
       (from y) * 2 + (1 + (from x) * 2 + 1) ≡⟨ cong (λ u → (from y) * 2 + u) (+-comm 1 ((from x) * 2 + 1)) ⟩
-      
       (from y) * 2 + ((from x) * 2 + 1 + 1) ≡⟨ cong (λ u → from y * 2 + u ) (+-assoc ((from x) * 2) 1 1) ⟩
       (from y) * 2 + ((from x) * 2 + (1 + 1)) ≡⟨ sym (+-assoc ((from y) * 2) ((from x) * 2) (1 + 1)) ⟩
       (from y) * 2 + (from x) * 2 + (1 + 1) ≡⟨ cong (λ u → u + (1 + 1)) (sym (*-distribʳ-+ 2 (from y) (from x))) ⟩
@@ -181,17 +180,97 @@ module BinaryNumbers where
       (from (add-one (add x y))) * 2
     ∎
 
+  
+
+  add-one-proof :  ∀ (x y : Bin) → add (add-one x) y  ≡ add-one (add x y)
+  add-one-proof ⟨⟩ y =
+    begin
+      add (add-one ⟨⟩) y ≡⟨ {!!} ⟩
+      add-one y
+    ∎
+  add-one-proof (x O) y = {!!}
+  add-one-proof (x I) y = {!!}
+
+
+  add-zero : ∀ x → add x (to zero) ≡ x
+  add-zero ⟨⟩ =
+    begin
+      add ⟨⟩ (to zero)  ≡⟨⟩
+      add ⟨⟩ ⟨⟩ ≡⟨⟩
+      ⟨⟩
+    ∎
+  add-zero (x O) =
+    begin
+      add (x O) (to zero) ≡⟨⟩
+      add (x O) ⟨⟩ ≡⟨ cong (λ _ → (x O)) (add-zero x) ⟩
+      (x O)
+    ∎
+  add-zero (x I) =
+    begin
+      add (x I) (to zero) ≡⟨⟩
+      add (x I) ⟨⟩ ≡⟨ cong (λ _ → (x I)) (add-zero x) ⟩
+      (x I)
+    ∎
+
   add-to : ∀ (m n : ℕ) → add (to m) (to n) ≡ to (m + n)
-  add-to m n = {!!}
+  add-to zero zero = refl
+  add-to zero (suc n) =
+    begin
+      add (to zero) (to (suc n)) ≡⟨⟩
+      add (to zero) (add-one (to n)) ≡⟨⟩
+      add-one (to n)
+    ∎
+  add-to (suc m) zero =
+     begin
+       add (to (suc m)) (to zero) ≡⟨ add-zero (to (suc m)) ⟩
+       to (suc m) ≡⟨ cong (λ u → to u) (sym (+-identityʳ (suc m))) ⟩
+       to ((suc m) + zero)
+     ∎
+  add-to (suc m) (suc n) = 
+     begin
+       add (to (suc m)) (to (suc n)) ≡⟨⟩
+       add (add-one (to m)) (to (suc n)) ≡⟨ {!!} ⟩
+       add-one (add (to m) (to (suc n))) ≡⟨ cong add-one (add-to m (suc n)) ⟩
+       add-one (to (m + (suc n)))
+     ∎
   -- Now prove basic properties of addition (hint: use existing
   -- properties for ℕ in the standard library and transport them to binary
   -- using add-from and add-to).
 
-  add-zero : ∀ x → add x (to zero) ≡ x
-  add-zero x = {!!}
+  to∘from :  ∀ (x : Bin) →  to (from x) ≡ x
+  to∘from ⟨⟩ = refl
+  to∘from (x O) =
+    begin
+      to (from x * 2) ≡⟨ {!!} ⟩
+      x O
+    ∎
+  to∘from (x I) =
+    begin
+      to (from x * 2 + 1) ≡⟨ {!!} ⟩
+      x I
+    ∎
 
   add-comm : ∀ x y → add x y ≡ add y x
-  add-comm x y = {!!}
+  add-comm x y =
+    begin
+      add x y ≡⟨ {!!} ⟩ -- ≡⟨ add-to (from x) (from y) ⟩
+      to (from x + from y) ≡⟨ cong to (+-comm (from x) (from y)) ⟩
+      to (from y + from x) ≡⟨ {!!} ⟩ -- ≡⟨ sym (add-to (from x) (from y)) ⟩
+      add y x
+    ∎
+  --add-comm x ⟨⟩ =
+  --  begin
+  --    add x ⟨⟩ ≡⟨ add-zero x ⟩
+  --    x ≡⟨⟩
+  --    add ⟨⟩ x
+  --  ∎
+  --add-comm x (y O) =
+  --  begin
+  --    add x (y O) ≡⟨ add-from (from x) (from (y O)) ⟩ --≡⟨ cong (λ _ → {!add x (y O)!}) (add-comm x y) ⟩
+  --    to ((from x) + (from (y O))) ≡⟨ {!!} ⟩
+  --    {!!}
+  --  ∎
+  --add-comm x (y I) = {!!}
 
   add-assoc : ∀ x y z → add x (add y z) ≡ add (add x y) z
   add-assoc x y z = {!!}
