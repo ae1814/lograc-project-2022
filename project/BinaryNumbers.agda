@@ -250,27 +250,17 @@ module BinaryNumbers where
       x I
     ∎
 
+
   add-comm : ∀ x y → add x y ≡ add y x
   add-comm x y =
     begin
-      add x y  ≡⟨ add-to (from x) (from y) ⟩
+      add x y  ≡⟨ sym (to∘from (add x y)) ⟩
+      to (from (add x y)) ≡⟨ cong to (sym (add-from x y)) ⟩
       to (from x + from y) ≡⟨ cong to (+-comm (from x) (from y)) ⟩
-      to (from y + from x) ≡⟨ sym (add-to (from y) (from x)) ⟩
+      to (from y + from x) ≡⟨ cong to (add-from y x) ⟩
+      to (from (add y x)) ≡⟨ to∘from (add y x) ⟩
       add y x
     ∎
-  --add-comm x ⟨⟩ =
-  --  begin
-  --    add x ⟨⟩ ≡⟨ add-zero x ⟩
-  --    x ≡⟨⟩
-  --    add ⟨⟩ x
-  --  ∎
-  --add-comm x (y O) =
-  --  begin
-  --    add x (y O) ≡⟨ add-from (from x) (from (y O)) ⟩ --≡⟨ cong (λ _ → {!add x (y O)!}) (add-comm x y) ⟩
-  --    to ((from x) + (from (y O))) ≡⟨ {!!} ⟩
-  --    {!!}
-  --  ∎
-  --add-comm x (y I) = {!!}
 
   add-assoc : ∀ x y z → add x (add y z) ≡ add (add x y) z
   add-assoc x y z = {!!}
