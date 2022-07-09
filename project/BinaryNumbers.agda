@@ -253,9 +253,9 @@ module BinaryNumbers where
   add-comm : ∀ x y → add x y ≡ add y x
   add-comm x y =
     begin
-      add x y ≡⟨ {!!} ⟩ -- ≡⟨ add-to (from x) (from y) ⟩
+      add x y  ≡⟨ add-to (from x) (from y) ⟩
       to (from x + from y) ≡⟨ cong to (+-comm (from x) (from y)) ⟩
-      to (from y + from x) ≡⟨ {!!} ⟩ -- ≡⟨ sym (add-to (from x) (from y)) ⟩
+      to (from y + from x) ≡⟨ sym (add-to (from y) (from x)) ⟩
       add y x
     ∎
   --add-comm x ⟨⟩ =
