@@ -261,7 +261,7 @@ module BinaryNumbers where
       add ⟨⟩ ⟨⟩ ≡⟨ add-to (from ⟨⟩) (from ⟨⟩) ⟩
       to (zero + zero) ≡⟨⟩
       to (zero) ≡⟨⟩
-      ⟨⟩ ≡⟨ {!!} ⟩
+      ⟨⟩ ≡⟨ ⟨⟩O ⟩
       ⟨⟩ O
     ∎
   *+bin (x O) =
@@ -272,7 +272,8 @@ module BinaryNumbers where
     ∎
   *+bin (x I) = 
     begin
-      add (x I) (x I) ≡⟨ {!!} ⟩
+      add (x I) (x I) ≡⟨ add-to {!!} (from (x I)) ⟩
+      to ((from x * 2 + 1) + (from x * 2 + 1)) ≡⟨ {!!} ⟩
       x I O
     ∎
   
