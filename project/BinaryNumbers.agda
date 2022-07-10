@@ -180,7 +180,8 @@ module BinaryNumbers where
       (from (add-one (add x y))) * 2
     ∎
 
-  
+  -- add (to m) (to n) ≡ to (m + n)
+  -- add-from : ∀ (x y : Bin) → from x + from y ≡ from (add x y)  
 
   add-one-proof :  ∀ (x y : Bin) → add (add-one x) y  ≡ add-one (add x y)
   add-one-proof ⟨⟩ y =
@@ -249,19 +250,26 @@ module BinaryNumbers where
     ∎
 
 
-  
+
+
+  ⟨⟩O : ⟨⟩  ≡ ⟨⟩ O
+  ⟨⟩O = {!!}
+
   *+bin :  ∀ (x : Bin) →  add x x  ≡ (x O)
   *+bin ⟨⟩ =
     begin
-      add ⟨⟩ ⟨⟩ ≡⟨ {!!} ⟩
+      add ⟨⟩ ⟨⟩ ≡⟨ add-to (from ⟨⟩) (from ⟨⟩) ⟩
+      to (zero + zero) ≡⟨⟩
+      to (zero) ≡⟨⟩
+      ⟨⟩ ≡⟨ {!!} ⟩
       ⟨⟩ O
     ∎
   *+bin (x O) =
     begin
-      add (x O) (x O) ≡⟨ {!!} ⟩
+      add (x O) (x O) ≡⟨ add-to {!!} (from (x O)) ⟩
+      to ((from x * 2) + (from x * 2)) ≡⟨ {!!} ⟩
       x O O
     ∎
-    
   *+bin (x I) = 
     begin
       add (x I) (x I) ≡⟨ {!!} ⟩
@@ -280,15 +288,26 @@ module BinaryNumbers where
     ∎
   to∘from (x I) =
     begin
-      to (from x * 2 + 1) ≡⟨ {!!} ⟩
+      to (from x * 2 + 1) ≡⟨ cong to (+-comm (from x * 2) 1)  ⟩ --≡⟨ cong to (cong {!λ u → u + 1!} (*+ (from x))) ⟩
+      add-one (to (from x * 2)) ≡⟨ cong add-one (cong to (*+ (from x))) ⟩
+      add-one (to (from x + from x)) ≡⟨ cong add-one (sym (add-to (from x) (from x))) ⟩
+      add-one (add (to (from x)) (to (from x))) ≡⟨ cong add-one (cong (λ u → add u u) (to∘from x)) ⟩
+      add-one (add x x) ≡⟨ cong add-one (*+bin x) ⟩
+      add-one (x O) ≡⟨⟩
       x I
     ∎
+
+
+ -- add-one+ : ∀ (x : Bin) → (from x) + 1 ≡ from (add-one x)
+
 
   from∘to :  ∀ (x : ℕ) →  from (to x) ≡ x
   from∘to zero = refl
   from∘to (suc x) =
     begin
-      from (to (suc x))  ≡⟨ {!!} ⟩
+      from (to (suc x)) ≡⟨⟩
+      from (add-one (to x)) ≡⟨ sym (add-one+ (to x)) ⟩
+      from (to x) + 1 ≡⟨ +-comm (from (to x)) 1 ⟩
       suc (from (to x)) ≡⟨ cong suc (from∘to x) ⟩
       suc x
     ∎
