@@ -180,8 +180,7 @@ module BinaryNumbers where
       (from (add-one (add x y))) * 2
     ∎
 
-  -- add (to m) (to n) ≡ to (m + n)
-  -- add-from : ∀ (x y : Bin) → from x + from y ≡ from (add x y)  
+
 
   add-one-proof :  ∀ (x y : Bin) → add (add-one x) y  ≡ add-one (add x y)
   add-one-proof ⟨⟩ y =
@@ -276,7 +275,15 @@ module BinaryNumbers where
       to ((from x * 2 + 1) + (from x * 2 + 1)) ≡⟨ {!!} ⟩
       x I O
     ∎
-  
+
+
+  tmp :  ∀ (x : Bin) →  to (from x * 2)  ≡ (x O)
+  tmp x =
+    begin
+      {!!} ≡⟨ {!!} ⟩
+      {!!}
+    ∎
+
   to∘from :  ∀ (x : Bin) →  to (from x) ≡ x
   to∘from ⟨⟩ = refl
   to∘from (x O) =
@@ -355,8 +362,31 @@ module BinaryNumbers where
   -- Agda will compute the product of two 16-bit numbers in almost no time.
   -- A standard algorithm for multiplication of two n-bit binary numbers
   -- takes O(n²), which is fast enough.
+
+  aux-mul-O : Bin → Bin
+  aux-mul-O ⟨⟩ = ⟨⟩
+  aux-mul-O (x O) = (aux-mul-O x) O
+  aux-mul-O (x I) = (aux-mul-O x) O
+
+  aux-mul-I : Bin → Bin
+  aux-mul-I ⟨⟩ = ⟨⟩
+  aux-mul-I (x O) = (aux-mul-I x) O
+  aux-mul-I (x I) = (aux-mul-I x) I
+
+  add-tail-zeros : ℕ → Bin → Bin
+  add-tail-zeros zero x = x
+  add-tail-zeros (suc n) x = (add-tail-zeros n x) O
+
   mul : Bin → Bin → Bin
-  mul x y = {!!}
+  mul x y = aux-mul 0 (⟨⟩ O) x y
+    where
+      aux-mul : ℕ → Bin → Bin → Bin → Bin
+      aux-mul n sum x ⟨⟩ = sum
+      aux-mul n sum x (y O) = aux-mul (suc n) (add sum (add-tail-zeros n (aux-mul-O x))) x y
+      aux-mul n sum x (y I) = aux-mul (suc n) (add sum (add-tail-zeros n (aux-mul-I x))) x y
+
+
+  test-mul1 = mul (⟨⟩ I I I O I) (⟨⟩ I O O I)
 
   -- The definition of multiplication is correct. It is unlikely you can
   -- to this directly. Think abou thow you would prove it on paper, and
@@ -366,7 +396,15 @@ module BinaryNumbers where
   mul-from x y = {!!}
 
   mul-to : ∀ (m n : ℕ) → mul (to m) (to n) ≡ to (m * n)
-  mul-to m n = {!!}
+  mul-to zero zero = {!!}
+  mul-to zero (suc n) =
+    begin
+      mul (to zero) (to (suc n)) ≡⟨⟩
+      mul (to zero) (add-one (to n)) ≡⟨ {!!} ⟩
+      to (zero * suc n)
+    ∎
+  mul-to (suc m) zero = {!!}
+  mul-to (suc m) (suc n) = {!!}
 
   -- Show how to use mul-from and mul-to to verify that mul has
   -- the desired properties, by reusing results about _*_ from the
