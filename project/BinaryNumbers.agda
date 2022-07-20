@@ -4,7 +4,7 @@
 -- uporabljamo vedno ≈ za primerjavo Bin-stringov
 -- add-from je pomemben
 -- add-comm in add-assoc da pokažeš, kako se uporablja add-from
--- definicija from
+-- definicija mul
 -- mul-from
 -- mul-comm in mul-assoc (ni bistveno)
 -- bi me veselilo, če se naučiš uporabljati solve, da se bom še jaz naučil
