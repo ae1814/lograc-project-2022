@@ -202,29 +202,6 @@ module BinaryNumbers where
 
 
 
-  add-add-one :  ∀ (x y : Bin) → add (add-one x) y  ≡ add-one (add x y)
-  add-add-one ⟨⟩ ⟨⟩ = refl
-  add-add-one ⟨⟩ (y O) = refl
-  add-add-one ⟨⟩ (y I) = refl
-  add-add-one (x O) ⟨⟩ = refl
-  add-add-one (x O) (y O) = refl
-  add-add-one (x O) (y I) = refl
-  add-add-one (x I) ⟨⟩ = refl
-  add-add-one (x I) (y O) =
-    begin
-    {!!} ≡⟨ {!!} ⟩
-    {!!}
-      --≡⟨ cong (λ u → to u) (sym (add-from (add-one {!!}) (y O))) ⟩ --≡⟨ cong (λ u → to u) (sym (add-from {!(add-one (x I))!} (y O))) ⟩
-      --to (suc (from (x I)) +  (from (y O))) ≡⟨⟩
-      --add-one (to ((from (x I)) + (from (y O)))) ≡⟨⟩
-      --add-one (to ((from (add-one (x O))) + (from (y O)))) ≡⟨ {!!} ⟩
---      add-one (to ((from (add-one (x O)) * 2 + from y * 2)) ≡⟨ {!!} ⟩
-      --add-one (to (1 + 2 * ((from x) + (from y)))) ≡⟨ {!!} ⟩
-      --add-one (add (x I) (y O))
-    ∎
-  add-add-one (x I) (y I) = {!!}
-
-
   add-zero : ∀ x → add x (to zero) ≡ x
   add-zero ⟨⟩ =
     begin
@@ -244,28 +221,6 @@ module BinaryNumbers where
       add (x I) ⟨⟩ ≡⟨ cong (λ _ → (x I)) (add-zero x) ⟩
       (x I)
     ∎
-
-  add-to : ∀ (m n : ℕ) → add (to m) (to n) ≡ to (m + n)
-  add-to zero zero = refl
-  add-to zero (suc n) =
-    begin
-      add (to zero) (to (suc n)) ≡⟨⟩
-      add (to zero) (add-one (to n)) ≡⟨⟩
-      add-one (to n)
-    ∎
-  add-to (suc m) zero =
-     begin
-       add (to (suc m)) (to zero) ≡⟨ add-zero (to (suc m)) ⟩
-       to (suc m) ≡⟨ cong (λ u → to u) (sym (+-identityʳ (suc m))) ⟩
-       to ((suc m) + zero)
-     ∎
-  add-to (suc m) (suc n) = 
-     begin
-       add (to (suc m)) (to (suc n)) ≡⟨⟩
-       add (add-one (to m)) (to (suc n)) ≡⟨ add-add-one (to m) (add-one (to n)) ⟩
-       add-one (add (to m) (to (suc n))) ≡⟨ cong add-one (add-to m (suc n)) ⟩
-       add-one (to (m + (suc n)))
-     ∎
 
 
   from∘to :  ∀ (x : ℕ) →  from (to x) ≡ x
@@ -299,18 +254,7 @@ module BinaryNumbers where
      from (add (add x y) z)
    ∎
 
-  -- you may prove other properties, as you see fit, but you don't
-  -- have to go crazy here
-
-  -- We now repeat the above for multiplication. Here you will have
-  -- to work harder, because the algorithm is more involved. You may
-  -- have to first deal with bit shfiting and prove some auxliary results.
-  -- If you get stuck, ASK FOR ADVICE.
-
-  -- Definition of multiplication. This should be efficient enough so that
-  -- Agda will compute the product of two 16-bit numbers in almost no time.
-  -- A standard algorithm for multiplication of two n-bit binary numbers
-  -- takes O(n²), which is fast enough.
+-- MULTIPLICATION
 
   mul : Bin → Bin → Bin
   mul x ⟨⟩ =  ⟨⟩
