@@ -217,12 +217,17 @@ module BinaryNumbers where
 
 
   module Multiplication where
+  
 
     -- Definition -> multiplication for binary numbers
     mul : Bin → Bin → Bin
     mul x ⟨⟩ =  ⟨⟩
     mul x (y O) = (mul x y) O
     mul x (y I) = add x ((mul x y) O)
+
+    -- Auxilary proof for mul-from (Source ->  https://gist.github.com/andrejbauer/358722620c26c09d6be218bcd95ee654)
+    hen : ∀ (m n : ℕ) → m * (2 * n + 1) ≡ n * m * 2 + m
+    hen = solve 2 (λ m n → m :* (con 2 :* n :+ con 1) := n :* m :* con 2 :+ m) refl
 
     -- Proof -> definition of binary multiplication (mul) is correct
     mul-from : ∀ (x y : Bin) → from x * from y ≡ from (mul x y)
@@ -237,8 +242,7 @@ module BinaryNumbers where
       begin
         from x * from (y I) ≡⟨⟩
         from x * (from y * 2 + 1) ≡⟨ cong (λ u → from x * (u + 1)) (*-comm (from y) 2) ⟩
-        from x * (2 * from y + 1) ≡⟨ solve 2 (λ p n → p :* (con 2 :* n :+ con 1) := p :* n :+ p :+ n :* p) refl (from x) (from y) ⟩
-        from x * from y + from x + from y * from x ≡⟨ solve 2 (λ p n → p :* n :+ p :+ n :* p := n :* p :* con 2 :+ p) refl (from x) (from y) ⟩
+        from x * (2 * from y + 1) ≡⟨ hen (from x) (from y) ⟩
         from y * from x * 2 + from x ≡⟨ +-comm (from y * from x * 2) (from x) ⟩
         from x + from y * from x * 2 ≡⟨ cong (λ u → from x + u * 2) (*-comm (from y) (from x)) ⟩
         from x + (from x * from y) * 2 ≡⟨ cong (λ u → from x + u * 2) (mul-from x y) ⟩
