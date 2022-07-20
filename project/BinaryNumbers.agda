@@ -23,23 +23,29 @@ module BinaryNumbers where
 
   infixl 20 _O
   infixl 20 _I
-   
+
+  data NonEmptyBin : Bin → Set where
+    neO : {b : Bin} → NonEmptyBin (b O)
+    neI : {b : Bin} → NonEmptyBin (b I)
   -- In Exercises 1 you will also find maps for converting
   -- binary numbers to Agda ℕ.
   
-  add-one : Bin → Bin
-  add-one ⟨⟩ = ⟨⟩ I
+  add-one : (b : Bin)  → Bin
+  add-one ⟨⟩  = ⟨⟩ I
   add-one (n O) = n I
   add-one (n I) = (add-one n) O
+  --add-one (n O I) = (add-one (n O) ) O
+ -- add-one (n I I) = (add-one (n I) ) O
   
   to : ℕ → Bin
   to zero = ⟨⟩
   to (suc n) = add-one (to n)
 
-  from : Bin → ℕ
+  from : Bin  → ℕ
   from ⟨⟩ = zero
   from (b O) = (from b) * 2
   from (b I) = (from b) * 2 + 1
+
 
   -- The topic of your project is to further develop arithmetic
   -- using Binary numbers directly.
@@ -181,11 +187,38 @@ module BinaryNumbers where
     ∎
 
 
+  add-one≡add : ∀ (x : Bin) → add x (⟨⟩ I) ≡ add-one x
+  add-one≡add ⟨⟩ =
+    begin
+      add ⟨⟩ (⟨⟩ I) ≡⟨⟩
+      add-one ⟨⟩
+    ∎
+  add-one≡add (x O) =
+    begin
+      add (x O) (⟨⟩ I) ≡⟨ cong to (sym (add-from (x O) {!!})) ⟩
+      to (from x * 2 + 1) ≡⟨ cong to (+-comm (from x * 2) 1) ⟩
+      to (1 + from x * 2) ≡⟨⟩
+      add-one (to (from x * 2)) ≡⟨ {!!} ⟩
+      add-one (x O)
+    ∎
+  add-one≡add (x I) =
+    begin
+      add (x I) (⟨⟩ I) ≡⟨ {!!} ⟩
+      add-one (x I)
+    ∎
+    --begin
+    --  add x (⟨⟩ I) ≡⟨ {!!} ⟩
+    --  add-one x
+    --∎
 
+  -- PROBLEM_1: 
   add-one-proof :  ∀ (x y : Bin) → add (add-one x) y  ≡ add-one (add x y)
   add-one-proof ⟨⟩ y =
     begin
-      add (add-one ⟨⟩) y ≡⟨ {!!} ⟩
+      add (add-one ⟨⟩) y ≡⟨⟩
+      add (add ⟨⟩ (⟨⟩ I)) y ≡⟨⟩
+      add ⟨⟩ (add (⟨⟩ I) y) ≡⟨ {!!} ⟩
+      add ⟨⟩ (add-one y) ≡⟨⟩
       add-one y
     ∎
   add-one-proof (x O) y = {!!}
@@ -250,10 +283,12 @@ module BinaryNumbers where
 
 
 
-
   ⟨⟩O : ⟨⟩  ≡ ⟨⟩ O
-  ⟨⟩O = {!!}
-
+  ⟨⟩O =
+    begin
+      ⟨⟩ ≡⟨ {!add!} ⟩
+      ⟨⟩ O
+    ∎
   *+bin :  ∀ (x : Bin) →  add x x  ≡ (x O)
   *+bin ⟨⟩ =
     begin
@@ -378,13 +413,16 @@ module BinaryNumbers where
   add-tail-zeros (suc n) x = (add-tail-zeros n x) O
 
   mul : Bin → Bin → Bin
-  mul x y = aux-mul 0 (⟨⟩ O) x y
-    where
-      aux-mul : ℕ → Bin → Bin → Bin → Bin
-      aux-mul n sum x ⟨⟩ = sum
-      aux-mul n sum x (y O) = aux-mul (suc n) (add sum (add-tail-zeros n (aux-mul-O x))) x y
-      aux-mul n sum x (y I) = aux-mul (suc n) (add sum (add-tail-zeros n (aux-mul-I x))) x y
-
+  
+ -- mul x y = aux-mul 0 (⟨⟩ O) x y
+ --   where
+ --     aux-mul : ℕ → Bin → Bin → Bin → Bin
+ --     aux-mul n sum x ⟨⟩ = sum
+ --     aux-mul n sum x (y O) = aux-mul (suc n) (add sum (add-tail-zeros n (aux-mul-O x))) x y
+ --     aux-mul n sum x (y I) = aux-mul (suc n) (add sum (add-tail-zeros n (aux-mul-I x))) x y
+  mul x ⟨⟩ =  ⟨⟩
+  mul x (y O) = (mul x y) O
+  mul x (y I) = add x ((mul x y) O)
 
   test-mul1 = mul (⟨⟩ I I I O I) (⟨⟩ I O O I)
 
@@ -393,25 +431,98 @@ module BinaryNumbers where
   -- what auxiliary lemmas you should prove first.
 
   mul-from : ∀ (x y : Bin) → from x * from y ≡ from (mul x y)
-  mul-from x y = {!!}
+  mul-from ⟨⟩ ⟨⟩ = 
+    begin
+      from ⟨⟩ * from ⟨⟩ ≡⟨ {!!} ⟩
+      from (mul ⟨⟩ ⟨⟩)
+    ∎    
+  mul-from ⟨⟩ (y O) = 
+    begin
+      from ⟨⟩ * from (y O) ≡⟨ {!!} ⟩
+      from (mul ⟨⟩ (y O))
+    ∎    
+  mul-from ⟨⟩ (y I) =  
+    begin
+      from ⟨⟩ * from (y I) ≡⟨ {!!} ⟩
+      from (mul ⟨⟩ (y I))
+    ∎    
+  mul-from (x O) ⟨⟩ =  
+    begin
+      from (x O) * from ⟨⟩ ≡⟨ {!!} ⟩
+      from (mul (x O) ⟨⟩)
+    ∎    
+  mul-from (x O) (y O) = 
+    begin
+      from (x O) * from (y O) ≡⟨ {!!} ⟩
+      from (mul (x O) (y O))
+    ∎    
+  mul-from (x O) (y I) =  
+    begin
+      from (x O) * from (y I) ≡⟨ {!!} ⟩
+      from (mul (x O) (y I))
+    ∎    
+  mul-from (x I) ⟨⟩ = 
+    begin
+      from (x I) * from ⟨⟩ ≡⟨ {!!} ⟩
+      from (mul (x I) ⟨⟩)
+    ∎    
+  mul-from (x I) (y O) = 
+    begin
+      from (x I) * from (y O) ≡⟨ {!!} ⟩
+      from (mul (x I) (y O))
+    ∎    
+  mul-from (x I) (y I) =  
+    begin
+      from (x I) * from (y I) ≡⟨ {!!} ⟩
+      from (mul (x I) (y I))
+    ∎    
+
+  
 
   mul-to : ∀ (m n : ℕ) → mul (to m) (to n) ≡ to (m * n)
-  mul-to zero zero = {!!}
+  mul-to zero zero = 
+    begin
+      mul (to zero) (to zero) ≡⟨ {!!} ⟩
+      to (zero * zero)
+    ∎    
   mul-to zero (suc n) =
     begin
       mul (to zero) (to (suc n)) ≡⟨⟩
       mul (to zero) (add-one (to n)) ≡⟨ {!!} ⟩
       to (zero * suc n)
     ∎
-  mul-to (suc m) zero = {!!}
-  mul-to (suc m) (suc n) = {!!}
+  mul-to (suc m) zero = 
+    begin
+      mul (to (suc m)) (to zero) ≡⟨ {!!} ⟩
+      to (suc m * zero)
+    ∎    
+  mul-to (suc m) (suc n) = 
+    begin
+      mul (to (suc m)) (to (suc n)) ≡⟨ {!!} ⟩
+      to (suc m * suc n)
+    ∎    
 
   -- Show how to use mul-from and mul-to to verify that mul has
   -- the desired properties, by reusing results about _*_ from the
   -- standard library.
 
   mul-zero : ∀ (x : Bin) → mul x (to zero) ≡ to zero
-  mul-zero x = {!!}
-
+  mul-zero ⟨⟩ =
+    begin
+      mul ⟨⟩ (to zero) ≡⟨ mul-to (from ⟨⟩) zero ⟩
+      to (zero * zero) ≡⟨⟩
+      to zero
+    ∎
+  mul-zero (x O) =
+    begin
+      mul (x O) (to zero) ≡⟨ {!!} ⟩
+      to zero
+    ∎    
+  mul-zero (x I) = 
+    begin
+      mul (x I) (to zero) ≡⟨ {!!} ⟩
+      to zero
+    ∎    
+  
   -- similarly verify: commutativity, associativity, 1 is unit,
   -- and distributivity of mul over add.
